@@ -4,7 +4,8 @@ const puppeteer = require('puppeteer');
 let fs = require('fs');
 const fbiurl = "https://www.fbi.gov/wanted/kidnap";
 let missingpersons = [];
-let fbimissingpersondatafile = "fbimissingpersondata.txt";
+let fbimissingpersondatafileName = "fbimissingpersondata.txt";
+let fbimissingpersondetailsfileName = "fbimissingpersondetailsfile.txt"
 let fbimissingpersondetails = [];
 
 // function for geting intial links of missing persons from fbi url
@@ -35,7 +36,7 @@ let storeInitialFBIData = async () => {
         return person.replace(/\n/g, "");
     }
 
-    fs.writeFile(fbimissingpersondatafile, JSON.stringify(missingpersons), err => {
+    fs.writeFile(fbimissingpersondatafileName, JSON.stringify(missingpersons), err => {
         if(err) console.log(err);
         console.log("Saved.")
     })
@@ -70,13 +71,15 @@ let storeInitialFBIData = async () => {
 
     fbimissingpersondetails.push(missingpersonobj);
 
-    
-    console.log(fbimissingpersondetails);
+    fs.writeFile(fbimissingpersondetailsfileName, JSON.stringify(fbimissingpersondetails), err => {
+        if(err) console.log(err);
+        console.log("Saved.")
+    })
 
     browser.close();
   };
 
-fs.readFile(fbimissingpersondatafile, async (err, data) => {
+fs.readFile(fbimissingpersondatafileName, async (err, data) => {
     if(err) console.log(err);
     let details = JSON.parse(data);
     for(let i = 0; i <= details.length; i++) {
