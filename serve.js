@@ -38,7 +38,6 @@ let storeInitialFBIData = async () => {
 
     fs.writeFile(fbimissingpersondatafileName, JSON.stringify(missingpersons), err => {
         if(err) console.log(err);
-        console.log("Saved.")
     })
   
     browser.close();
@@ -69,33 +68,30 @@ let storeInitialFBIData = async () => {
     missingpersonobj["Details"] = details;
     missingpersonobj["Submit a Tip"] = submittip;
 
+    // need to send info gathered to a DB here
     fbimissingpersondetails.push(missingpersonobj);
 
     fs.writeFile(fbimissingpersondetailsfileName, JSON.stringify(fbimissingpersondetails), err => {
         if(err) console.log(err);
-        console.log("Saved.")
+        console.log("Saved Details.")
     })
 
     browser.close();
   };
 
-fs.readFile(fbimissingpersondatafileName, async (err, data) => {
-    if(err) console.log(err);
-    let details = JSON.parse(data);
-    for(let i = 0; i <= details.length; i++) {
-        await getPersonsFromFBIData(details[i].link);
-    }
-})
-
-
-
-
-
-
-
+function sortMissingPersonData() {
+    fs.readFile(fbimissingpersondatafileName, async (err, data) => {
+        if(err) console.log(err);
+        let details = JSON.parse(data);
+        for(let i = 0; i <= details.length; i++) {
+            await getPersonsFromFBIData(details[i].link);
+        }
+    })
+}
 
 async function getalldata() {
     await storeInitialFBIData();
+    sortMissingPersonData();
 }
 
-//getalldata();
+getalldata();
