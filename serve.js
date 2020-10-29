@@ -4,7 +4,8 @@ const puppeteer = require('puppeteer');
 let fs = require('fs');
 const fbiurl = "https://www.fbi.gov/wanted/kidnap";
 let missingpersons = [];
-let fbimissingpersondatafile = "fbimissingpersondata.txt"
+let fbimissingpersondatafile = "fbimissingpersondata.txt";
+let fbimissingpersondetails = [];
 
 // function for geting intial links of missing persons from fbi url
 let storeInitialFBIData = async () => {
@@ -46,14 +47,31 @@ let storeInitialFBIData = async () => {
   let getPersonsFromFBIData = async (link) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    let alldetails = [];
+    let missingpersonobj = {};
   
     await page.goto(link, { waitUntil: 'networkidle0' });
 
-    let details = await page.evaluate(() => Array.from(document.querySelectorAll('.wanted-person-details > p'), element => element.textContent));
-    details.forEach(el => alldetails.push({details: el}));
+    let name = await page.evaluate(() => document.querySelector('.documentFirstHeading').textContent);
+    let submittip = await page.evaluate(() => document.querySelector('.wanted-person-submit p').textContent);
+    let details = await page.evaluate(() => document.querySelector('.wanted-person-details p').textContent);
+    let content = await page.evaluate(() => document.querySelector('.wanted-person-description table tbody tr'));
+    let allmissingpersoninfo = await page.evaluate(() => Array.from(content.querySelectorAll('td'), element => element.innerHTML));
     
-    console.log(alldetails);
+    let newcontent = [];
+    for(var i = 0; i < allmissingpersoninfo.length; i += 2) {
+        newcontent.push(allmissingpersoninfo.slice(i, i + 2));
+    }
+    newcontent.forEach(el => {
+        missingpersonobj[el[0]] = el[1]
+    })
+    missingpersonobj["Name"] = name;
+    missingpersonobj["Details"] = details;
+    missingpersonobj["Submit a Tip"] = submittip;
+
+    fbimissingpersondetails.push(missingpersonobj);
+
+    
+    console.log(fbimissingpersondetails);
 
     browser.close();
   };
