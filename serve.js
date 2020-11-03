@@ -1,5 +1,10 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+//DB Info
+const mongodb = require('mongodb');
+const mongoclient = mongodb.MongoClient;
+const connectionURL = 'mongodb://127.0.0.1:27017';
+const databasename = 'fbi-missing-persons';
+
+//Web Scraping Info
 const puppeteer = require('puppeteer');
 let fs = require('fs');
 const fbiurl = "https://www.fbi.gov/wanted/kidnap";
@@ -71,10 +76,27 @@ let storeInitialFBIData = async () => {
     // need to send info gathered to a DB here
     fbimissingpersondetails.push(missingpersonobj);
 
-    fs.writeFile(fbimissingpersondetailsfileName, JSON.stringify(fbimissingpersondetails), err => {
-        if(err) console.log(err);
-        console.log("Saved Details.")
+    mongoclient.connect(connectionURL, { useUnifiedTopology: true }, (err, client) => {
+        if(err) return console.log(err);
+        
+        const db = client.db(databasename);
+        
+        //Updating if already exists
+
+
+        //Inserting each missing person to DB
+        db.collection('missing-persons').insertOne(missingpersonobj, (err, res) => {
+            if(err) return console.log(err);
+            console.log(res.ops);
+        });
+
+        console.log("Saved Person To DB.");
     })
+
+    // fs.writeFile(fbimissingpersondetailsfileName, JSON.stringify(fbimissingpersondetails), err => {
+    //     if(err) console.log(err);
+    //     console.log("Saved Person.");
+    // });
 
     browser.close();
   };
